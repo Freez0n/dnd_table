@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>D&D Стол: {{ room.name }}</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+</head>
+<body class="room-page">
+    <div class="vtt-layout">
+
+        <aside class="sidebar character-sidebar">
+            <div class="sidebar-header">
+                <h2>Герой</h2>
+            </div>
+            <div class="char-sheet-mini">
+                <input type="text" class="char-name-input" value="{{ char.name }}" placeholder="Имя персонажа">
+
+                <div class="stats-grid">
+                    {% for stat in [('STR', char.str), ('DEX', char.dex), ('CON', char.con), ('INT', char.int), ('WIS', char.wis), ('CHA', char.cha)] %}
+                    <div class="stat-box">
+                        <label>{{ stat[0] }}</label>
+                        <input type="number" value="{{ stat[1] }}">
+                        <span class="mod">+{{ (stat[1] - 10) // 2 }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="vitality-bars">
+                    <div class="bar-group">
+                        <label>HP</label>
+                        <input type="number" class="hp-input" value="{{ char.hp }}">
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="tabletop-area">
+            <div class="table-controls">
+                <span class="room-title">{{ room.name }}</span>
+                {% if is_dm %}
+                <button class="dm-tool" onclick="spawnEnemy()">+ Враг</button>
+                <button class="dm-tool" onclick="clearTable()">Очистить</button>
+                {% endif %}
+            </div>
+
+            <div id="game-board" class="canvas-board" ondragover="allowDrop(event)" ondrop="drop(event)">
+                <div id="token-p-{{ current_user.id }}"
+                     class="token player-token"
+                     draggable="true"
+                     ondragstart="drag(event)">
+                    {{ current_user.username[:2] | upper }}
+                </div>
+            </div>
+        </main>
+
+        <aside class="sidebar action-sidebar">
+            <div class="sidebar-header">
+    <h2>Инициатива</h2>
+</div>
+
+{% if is_dm %}
+<div class="init-controls">
+    <input type="text" id="init-name" placeholder="Имя" style="width: 60%;">
+    <input type="number" id="init-val" placeholder="20" style="width: 25%;">
+    <button onclick="addInitiative()" class="dm-tool">+</button>
+    <button onclick="clearInitiative()" class="dm-tool" style="background:#555">×</button>
+</div>
+{% endif %}
+
+<div id="initiative-list" class="scroll-area">
+    </div>
+            <div id="initiative-list" class="scroll-area">
+                </div>
+            <div class="sidebar-header">
+                <h2>В таверне</h2>
+            </div>
+
+<div id="player-list" class="player-list-container">
+    </div>
+            <div class="dice-roller-area">
+                <div class="dice-grid">
+                    <button onclick="roll(20)">d20</button>
+                    <button onclick="roll(12)">d12</button>
+                    <button onclick="roll(10)">d10</button>
+                    <button onclick="roll(8)">d8</button>
+                    <button onclick="roll(6)">d6</button>
+                    <button onclick="roll(4)">d4</button>
+                </div>
+                <div class="roll-options">
+                    <label><input type="checkbox" id="private-roll"> Скрытно</label>
+                </div>
+                <div id="roll-log" class="roll-log"></div>
+            </div>
+        </aside>
+    </div>
+
+    <script src="/static/js/game.js"></script>
+</body>
+</html>
